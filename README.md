@@ -3,6 +3,8 @@
 This is an API to manage StarWars Characters data. 
 
 The information is stored in a SQLite DB and the API built with FastAPI.
+.
+\t
 
 In order to run the API you can use Docker or do the step by step yourself:
 
@@ -24,5 +26,6 @@ In order to run the API you can use Docker or do the step by step yourself:
 - Open a browser in LocalHost ( http://0.0.0.0:8000 ). You will see the Swagger documentation displayed at the home url where you can test some scenarios.
 
 
-# IMPORTANT:   The LocalHost should address should not be in use by other container or app. If this would happen  you will get an error message describing the port is not free to use. In such scenario use a different port.
+# IMPORTANT:   
+The LocalHost should address should not be in use by other container or app. If this would happen  you will get an error message describing the port is not free to use. In such scenario use a different port.
 
