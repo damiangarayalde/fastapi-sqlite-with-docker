@@ -3,8 +3,7 @@
 This is an API to manage StarWars Characters data. 
 
 The information is stored in a SQLite DB and the API built with FastAPI.
-.
-\t
+
 
 In order to run the API you can use Docker or do the step by step yourself:
 
