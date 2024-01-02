@@ -1,10 +1,9 @@
 from database import engine, Session, Base
-from models import CharactersTable
-from pydantic import BaseModel, Field
+from db_table_models import CharactersTable
 from fastapi import FastAPI, HTTPException, Depends
 from typing import List
 import json
-
+from models import Character, Character_subset_of_fields
 
 app = FastAPI(
     title="API to manage a StarWars' characters db",
@@ -22,29 +21,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-class Character(BaseModel):
-    """ Every being in the galaxy has these attributes and their values comply to these restrictions: """
-    id:         int = Field(1, gt=0)
-    name:       str = Field('Yoda', min_length=1)
-    height:     int = Field(45, gt=0)
-    mass:       int = Field(40, gt=0)
-    hair_color: str = Field('None', min_length=3, max_length=30)
-    skin_color: str = Field('Green', min_length=3, max_length=30)
-    eye_color:  str = Field('Green', min_length=3, max_length=30)
-    birth_year: int = Field(900, gt=0)
-
-
-class Character_subset_of_fields(BaseModel):
-    """ When queryng for all characters we will only return these fields: """
-    id:         int = Field(1, gt=0)
-    name:       str = Field('Yoda', min_length=1)
-    height:     int = Field(45, gt=0)
-    mass:       int = Field(40, gt=0)
-    skin_color: str = Field('Green', min_length=3, max_length=30)
-    eye_color:  str = Field('Green', min_length=3, max_length=30)
-    birth_year: int = Field(900, gt=0)
 
 
 def init_db_with_main_characters():
@@ -84,7 +60,7 @@ async def pre_load_db_with_records(db: Session = Depends(get_db)):
 
 @app.get("/character/getAll", response_model=List[Character_subset_of_fields])
 def get_all_characters(db: Session = Depends(get_db)):
-
+    ''' An endpoint to get a list of all the Characters in the table. '''
     character_list = db.query(CharactersTable.id,
                               CharactersTable.name,
                               CharactersTable.height,
@@ -95,9 +71,13 @@ def get_all_characters(db: Session = Depends(get_db)):
 
     return character_list
 
+    # An endpoint to update a Character by it's ID
+
 
 @app.get("/character/get/{id}", response_model=Character)
 def get_character_by_id(id: int, db: Session = Depends(get_db)):
+    ''' An endpoint to get a Character's info by ID.  
+    If it does not exists a HTTP Exception of 400 indicating so will be raised. '''
 
     requested_character = db.query(CharactersTable).filter(
         CharactersTable.id == id).first()
@@ -111,6 +91,8 @@ def get_character_by_id(id: int, db: Session = Depends(get_db)):
 
 @app.post("/character/add", response_model=Character)
 def add_new_character(character: Character, db: Session = Depends(get_db)):
+    ''' An endpoint to add a new Character.
+    If the ID already exists a HTTP Exception of 400 indicating so will be raised. '''
 
     existing_character_with_that_id = db.query(CharactersTable).filter(
         CharactersTable.id == character.id).first()
@@ -139,6 +121,8 @@ def add_new_character(character: Character, db: Session = Depends(get_db)):
 
 @app.put("/character/update/", response_model=Character)
 def update_character_by_id(character: Character, db: Session = Depends(get_db)):
+    ''' An endpoint to update a Character by ID.
+    If the ID does not exists a HTTP Exception of 400 indicating so will be raised. '''
 
     character_to_update = db.query(CharactersTable).filter(
         CharactersTable.id == character.id).first()
@@ -165,6 +149,8 @@ def update_character_by_id(character: Character, db: Session = Depends(get_db)):
 
 @app.delete("/character/delete/{id}")
 def delete_character_by_id(id: int, db: Session = Depends(get_db)):
+    ''' An endpoint to delete a Character by ID.
+    If the ID does not exists a HTTP Exception of 400 indicating so will be raised. '''
 
     character_to_be_deleted = db.query(CharactersTable).filter(
         CharactersTable.id == id).first()
